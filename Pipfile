@@ -11,6 +11,8 @@ langgraph = "*"
 langchain-google-genai = "*"
 duckduckgo-search = "*"
 langchain-community = "*"
+python-dotenv = "*"
+pydantic-settings = "*"
 
 [dev-packages]
 
