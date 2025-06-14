@@ -74,3 +74,45 @@ async def generate_search_queries_node(state: ResearchState) -> Dict[str, Any]:
             "error_message": str(e)
         }
 
+
+async def perform_search_node(state: ResearchState) -> Dict[str, Any]:
+    """
+    Node to perform web searches using DuckDuckGo for the generated queries.
+    """
+    queries = state.generated_search_queries
+    
+    if not queries:
+        print("No search queries provided. Skipping search.")
+        return {
+            "status_message": "No search queries to perform search.",
+            "error_message": "NO_SEARCH_QUERIES_PROVIDED"
+        }
+
+    all_results = []
+    current_history = list(state.search_queries_history)
+
+    for query in queries:
+        try:
+            query_results_str = search_tool.invoke(query)
+
+            results_for_this_query = [{"query": query, "content_summary": query_results_str}]
+            all_results.extend(results_for_this_query)
+            
+            current_history.append({
+                "query": query,
+                "results_summary": query_results_str
+            })
+            print(f"Results for '{query}': {query_results_str[:200]}...")
+            
+        except Exception as e:
+            print(f"Error during search for query '{query}': {e}")
+            
+            all_results.append({"query": query, "error": str(e)})
+            current_history.append({"query": query, "error": str(e)})
+
+
+    return {
+        "raw_search_results": all_results,
+        "search_queries_history": current_history,
+        "status_message": f"Performed search for {len(queries)} queries. Found {len(all_results)} result sets."
+    }
