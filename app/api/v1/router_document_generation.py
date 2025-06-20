@@ -12,6 +12,14 @@ class StartDocumentGenerationRequest(BaseModel):
         description="The main topic for document generation.",
         example="The impact of AI on climate change"
     )
+    reference_urls: List[str] = Field(
+        default_factory=list, 
+        description="Optional list of reference URLs provided by the user.",
+        example = [
+            "https://example.com/article1",
+            "https://blog.example.com/post2"
+        ]
+    )
 
 class DocumentGenerationResponse(BaseModel):
     message: str = Field(description = "Status message of the operation.")
@@ -35,6 +43,7 @@ async def start_document_generation_endpoint(
 
     initial_input_for_master_graph = {
         "initial_topic": request_body.topic,
+        "reference_urls": request_body.reference_urls,
     }
 
     try:

@@ -90,6 +90,8 @@ async def generate_search_queries_node(state: ResearchState) -> Dict[str, Any]:
                 "critique_feedback": "LLM failed to generate any queries. Consider re-evaluating topic or prompt.",
                 "is_information_sufficient": False
             }
+    
+        print(f"\n\n--------------Generated Queries:\n{generated_queries_str}\n--------------\n\n")
         
         return {
             "generated_search_queries": generated_queries,
@@ -183,6 +185,8 @@ async def perform_search_node(state: ResearchState) -> Dict[str, Any]:
                 "query": query,
                 "error": str(e)
             })
+
+    print(f"\n\n\n\n------------------Search results: \n for {all_results} queries \n------------------\n")
 
     return {
         "raw_search_results": all_results, 

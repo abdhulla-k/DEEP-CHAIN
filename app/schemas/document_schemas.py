@@ -64,6 +64,10 @@ class ResearchState(BaseModel):
         default_factory=list,
         description="Content scraped from relevant URLs found during web search."
     )
+    extracted_text_from_references: List[Dict[str, str]] = Field(
+        default_factory=list,
+        description="List of {'url': url, 'extracted_text': text} from reference URLs after processing."
+    )
     
     # Information Processing & Critique
     consolidated_information: Optional[str] = Field(

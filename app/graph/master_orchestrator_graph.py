@@ -11,7 +11,9 @@ async def invoke_research_subgraph_node(state: ResearchState) -> dict:
     subgraph_input = state.model_dump()
 
     try: 
+        print(f"\n Invoking research sub-graph with input: {subgraph_input} \n")
         research_subgraph_final_state_dict = await compiled_research_subgraph.ainvoke(subgraph_input)
+        
 
         return research_subgraph_final_state_dict
 
