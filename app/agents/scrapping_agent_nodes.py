@@ -97,3 +97,63 @@ async def scrape_reference_urls_node(state: ResearchState) -> Dict[str, Any]:
         "status_message": status_msg,
         "error_message": None 
     }
+
+async def extract_text_from_scraped_content_node(state: ResearchState) -> Dict[str, Any]:
+    """
+    Node to extract clean text from previously scraped HTML content.
+    Populates `extracted_text_from_references`.
+    Uses BeautifulSoup for basic text extraction. For articles, consider `trafilatura`.
+    """
+
+    scraped_data = state.scraped_content_from_references
+
+    # Make sure we have scraped content to extract text from
+    if not scraped_data:
+        return {
+            "extracted_text_from_references": [],
+            "status_message": "No scraped content for text extraction."
+        }
+
+    extracted_texts: List[Dict[str, str]] = []
+    
+    for page in scraped_data:
+        if page.error or not page.content:
+            extracted_texts.append({
+                "url": page.url,
+                "extracted_text": "",
+                "title": page.title or "N/A",
+                "error": page.error or "No content to extract"
+            })
+            continue
+
+        try:
+            soup = BeautifulSoup(page.content, "lxml")
+            
+            # Basic text extraction: get all text from the body
+            body = soup.find("body")
+            if body:
+                # Get text and join paragraphs. Replace multiple newlines/spaces.
+                page_text = ' '.join(body.get_text(separator=' ', strip=True).split())
+            else:
+                page_text = ' '.join(soup.get_text(separator=' ', strip=True).split())
+
+            extracted_texts.append({
+                "url": page.url,
+                "title": page.title or "N/A",
+                "extracted_text": page_text
+            })
+            
+        except Exception as e:
+            extracted_texts.append({
+                "url": page.url,
+                "title": page.title or "N/A",
+                "extracted_text": "",
+                "error": f"Extraction error: {str(e)}"
+            })
+
+    status_msg = f"Extracted text from {len(extracted_texts)} sources."
+    
+    return {
+        "extracted_text_from_references": extracted_texts,
+        "status_message": status_msg
+    }

@@ -66,11 +66,11 @@ async def start_document_generation_endpoint(
                 })
 
         response_data = DocumentGenerationResponse(
-            message="Document generation process initiated and initial research phase completed.",
-            initial_topic=final_master_graph_state_dict.get("initial_topic"),
-            generated_queries=generated_queries if generated_queries else None,
-            search_results_summary=search_summary if search_summary else None,
-            error_message=final_master_graph_state_dict.get("error_message")
+            message = "Document generation process initiated and initial research phase completed.",
+            initial_topic = final_master_graph_state_dict.get("initial_topic"),
+            generated_queries = generated_queries if generated_queries else None,
+            search_results_summary = search_summary if search_summary else None,
+            error_message = final_master_graph_state_dict.get("error_message")
         )
         return response_data
 
