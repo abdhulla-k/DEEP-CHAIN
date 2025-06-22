@@ -1,8 +1,12 @@
 from langgraph.graph import StateGraph, END
 from app.schemas.document_schemas import ResearchState
 
+# Import subgraphs
 from app.graph.subgraphs.research_graph import compiled_research_subgraph
 from app.graph.subgraphs.scraping_graph import compiled_scraping_subgraph
+
+# Import nodes
+from app.agents.synthesis_nodes import synthesize_information_node
 
 async def invoke_research_subgraph_node(state: ResearchState) -> dict:
     """
@@ -55,6 +59,7 @@ master_workflow = StateGraph(ResearchState)
 # Add nodes to the master workflow graph.
 master_workflow.add_node("research_phase", invoke_research_subgraph_node)
 master_workflow.add_node("scraping_phase", invoke_scraping_subgraph_node)
+master_workflow.add_node("synthesize_information_node", synthesize_information_node)
 
 # Set entry point of the main graph
 master_workflow.set_entry_point("research_phase")
@@ -67,25 +72,24 @@ def should_scrape_references(state: ResearchState) -> str:
 
     # Check for errors from the research phase first
     if state.error_message and "Research Sub-Graph Error" in state.error_message:
-        return "end_due_to_error"
+        return "synthesize_information_node"
 
     if state.reference_urls and len(state.reference_urls) > 0:
         return "scraping_phase"
     else:
-        return "end_no_urls"
+        return "synthesize_information_node"
 
 master_workflow.add_conditional_edges(
     "research_phase",
     should_scrape_references,
     {
         "scraping_phase": "scraping_phase",
-        "end_no_urls": END, 
-        "end_due_to_error": END
+        "synthesize_information_node": "synthesize_information_node"
     }
 )
 
-# After scraping_phase (if it runs), end the process with an END node.
-master_workflow.add_edge("scraping_phase", END)
+master_workflow.add_edge("scraping_phase", "synthesize_information_node")
+master_workflow.add_edge("synthesize_information_node", END)
 
 # Compile the master workflow into a runnable application.
 compiled_master_orchestrator_graph = master_workflow.compile()
